@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인애니로 InAnyLo</title>
+    <style>
+        body {
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #hospitalTitle {
+            color: crimson;
+            font-size: 24px;
+            margin-bottom: 10px;
+            margin-top: 50px;
+        }
+
+        #searchContainer {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            margin-bottom: 10px;
+        }
+
+        #searchBox {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #searchButton {
+            background-color: crimson;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #searchResultList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #voiceSearchButton {
+            background-color: crimson;
+            color: #fff;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="hospitalTitle">칠곡경대병원</div>
+    <div id="searchContainer">
+        <input type="text" id="searchBox" placeholder="진료과를 검색하세요">
+        <button id="searchButton" onclick="search()">검색</button>
+    </div>
+    <ul id="searchResultList"></ul>
+    <button id="voiceSearchButton" onclick="startVoiceRecognition()">음성 검색</button>
+
+    <script>
+        async function search() {
+            const searchTerm = document.getElementById('searchBox').value;
+
+            try {
+                // 'hospitalData' 키를 사용하여 데이터를 가져오도록 수정
+                const storedResult = JSON.parse(localStorage.getItem('hospitalData')) || [];
+                const result = storedResult.filter(item => item.department_name.includes(searchTerm));
+
+                const searchResultList = document.getElementById('searchResultList');
+                searchResultList.innerHTML = '';
+
+                result.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = item.department_name;
+                    searchResultList.appendChild(listItem);
+                });
+
+            } catch (error) {
+                console.error(error);
+                alert('검색 중 오류가 발생했습니다.');
+            }
+        }
+
+        function startVoiceRecognition() {
+            try {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+
+                recognition.onresult = function (event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('searchBox').value = transcript;
+                    search();
+                };
+
+                recognition.start();
+            } catch (error) {
+                console.error(error);
+                alert('음성 검색을 시작할 수 없습니다. 브라우저 호환성 및 권한을 확인하세요.');
+            }
+        }
+    </script>
+</body>
+</html>
